@@ -1,0 +1,26 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>ChatServerApplication</title>
+    <link rel="stylesheet" href="{% static 'css/stylesheet.css'%}" type="text/css">
+</head>
+<body>
+    <header>
+      <h1>Chat Client Application</h1>
+      <nav>
+        <ul>
+          <li><a href="#">Hello</a></li>
+          <li><a href="#">Online</a></li>
+          <li><a href="#">Something</a></li>
+        </ul>
+      </nav>
+    </header>
+    <main></main>
+    <footer>
+        <div id="output"></div>
+    </footer>
+    <script src="{% static 'js/chatclient.js' %}"></script>
+</body>
+</html>
