@@ -18,7 +18,9 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
+    'daphne',
     'django.contrib.staticfiles',
+    'channels',
     'django_filters',
     'rest_framework',
     'corsheaders',
@@ -56,6 +58,7 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = 'ChatApplication.wsgi.application'
+ASGI_APPLICATION = 'ChatApplication.asgi.application'
 
 DATABASES = {
     'default': {
