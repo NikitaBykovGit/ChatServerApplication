@@ -1,8 +1,9 @@
 import json
 from datetime import datetime
 
+from channels.exceptions import StopConsumer
 from django.forms.models import model_to_dict
-from channels.generic.websocket import WebsocketConsumer
+from channels.generic.websocket import AsyncWebsocketConsumer, WebsocketConsumer
 
 from chatserver.models import Message
 
@@ -17,6 +18,5 @@ class WSRoomConsumer(WebsocketConsumer):
             new_message = Message.objects.filter(time__gt=self.is_activated)
             if new_message.exists():
                 dict_message = model_to_dict(new_message[0])
-                print(json.dumps(dict_message))
                 self.is_activated = datetime.now()
                 self.send(json.dumps(dict_message))
