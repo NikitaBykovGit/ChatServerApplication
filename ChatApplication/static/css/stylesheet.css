@@ -56,14 +56,38 @@ main {
 
 #messages {
   position: absolute;
+  background-color: white;
   right: 00;
   width: 79%;
   height: 85vh;
-  border: 1px solid black;
+}
+
+#message_form {
+  position: absolute;
+  display: none;
+  bottom: 0;
+  height: 5vh;
+  width: 100%;
+}
+
+#message_form input {
+  height: 100%;
+  width: 95%;
+}
+
+#message_form button {
+  height: 100%;
+  width: 4%;
+}
+
+#messages_output {
+  overflow-y: auto;
+  height: 78vh;
+  width: 100%;
 }
 
 #messages_output article {
-  background-color: aliceblue;
+  background-color: rgb(179, 73, 73);
   display: block;
   margin: 8px;
 }
@@ -73,13 +97,28 @@ main {
   left: 0;
   width: 20%;
   height: 85vh;
-  border: 1px solid black;
+}
+
+.clickHide {
+  position: absolute;
+  top: 3px;
+  right: 0;
+}
+
+.clickHide:hover {
+  color: white;
+  cursor: pointer;
+}
+
+#hide_all {
+  display: none;
 }
 
 #chats_output article {
   background-color: aliceblue;
   display: block;
   margin: 8px;
+  width: 100%;
 }
 
 #chats_output article p {
@@ -87,10 +126,19 @@ main {
 }
 
 #chats_output article:hover {
-  transform: scale(1.05);
+  transform: scale(1.01);
 }
 
 #login {
   text-align: center;
   margin-top: 20%;
+}
+
+.rightCentr {
+  position: absolute;
+  right: 15px;
+}
+
+.rightCentr:hover {
+  cursor: pointer;
 }

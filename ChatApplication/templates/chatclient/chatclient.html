@@ -7,19 +7,39 @@
     <link rel="stylesheet" href="{% static 'css/stylesheet.css'%}" type="text/css">
 </head>
 <body>
-    <header>
+     <header>
       <h1>Chat Client Application</h1>
-      <nav>
+      <nav id = "nav">
         <ul>
-          <li><a href="#">Hello</a></li>
-          <li><a href="#">Online</a></li>
-          <li><a href="#">Something</a></li>
+          <li><a id="logout" href="#">Logout</a></li>
+          <li><a id="account_list" href="#"></a></li>
         </ul>
       </nav>
     </header>
-    <main></main>
+    <main>
+      <section id="login">
+        <input type="text" id="login_input" placeholder="Login">
+        <input type="password" id="pass_input" placeholder="Password">
+        <button id="login_btn">Login</button>
+        <div id="login_output"></div>
+      </section>
+      <section id="chats">
+        <h3>Chats</h3>
+        <p id="show_all" class="clickHide">Show all</p>
+        <p id="hide_all" class="clickHide">Hide all</p>
+        <div id="chats_output"></div>
+      </section>
+      <section id="messages">
+        <h3>Messages</h3>
+        <div id="messages_output"></div>
+        <aside id="message_form" method="post">
+          <input type="text" id="message_input" placeholder="Your message">
+          <button id="message_btn">Send</button>
+        </aside>
+      </section>
+    </main>
     <footer>
-        <div id="output"></div>
+      <div id="output"></div>
     </footer>
     <script src="{% static 'js/chatclient.js' %}"></script>
 </body>
