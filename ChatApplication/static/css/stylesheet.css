@@ -57,7 +57,7 @@ main {
 #messages {
   position: absolute;
   background-color: white;
-  right: 00;
+  right: 0;
   width: 79%;
   height: 85vh;
 }
@@ -99,14 +99,19 @@ main {
   height: 85vh;
 }
 
-.clickHide {
+#chats aside {
   position: absolute;
-  top: 3px;
+  top: 2px;
   right: 0;
 }
 
-.clickHide:hover {
-  color: white;
+.chatButton {
+  float: right;
+  width: 22px;
+  height: 22px;
+}
+
+.chatButton:hover {
   cursor: pointer;
 }
 
@@ -117,8 +122,8 @@ main {
 #chats_output article {
   background-color: aliceblue;
   display: block;
-  margin: 8px;
-  width: 100%;
+  margin: 5%;
+  width: 95%;
 }
 
 #chats_output article p {

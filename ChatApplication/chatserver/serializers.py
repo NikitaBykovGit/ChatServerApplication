@@ -10,7 +10,7 @@ class TimeRepresentationMixin(serializers.HyperlinkedModelSerializer):
 
 
 class RoomSerializer(TimeRepresentationMixin):
-    author = serializers.SlugRelatedField(slug_field='username', read_only=True)
+    author = serializers.SlugRelatedField(slug_field='username', queryset=User.objects.all())
     members = serializers.SerializerMethodField('get_members_count')
 
     def get_members_count(self, obj):

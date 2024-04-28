@@ -3,7 +3,6 @@ from django.contrib.auth.models import User
 from channels.generic.websocket import AsyncJsonWebsocketConsumer
 
 from chatserver.models import Message, Room
-from chatserver.serializers import MessageSerializer
 
 
 class WSRoomConsumer(AsyncJsonWebsocketConsumer):
@@ -14,12 +13,15 @@ class WSRoomConsumer(AsyncJsonWebsocketConsumer):
         await self.accept()
 
     async def receive_json(self, content, **kwargs):
-        author = await database_sync_to_async(User.objects.get)(username=content['author'])
-        room = await database_sync_to_async(Room.objects.get)(id=content['room'])
-        new_message = await database_sync_to_async(Message.objects.create)(
-            author=author,
-            room=room,
-            text=content['text'])
-        new_message_json = MessageSerializer(new_message).data
-        #await self.send_json(new_message_json)
-        await self.channel_layer.group_send(new_message_json)
+        if content['type'] == 'message':
+            author = await database_sync_to_async(User.objects.get)(username=content['author'])
+            room = await database_sync_to_async(Room.objects.get)(id=content['room'])
+            new_message = await database_sync_to_async(Message.objects.create)(
+                author=author,
+                room=room,
+                text=content['text']),
+            content['time'] = new_message[0].time.strftime("%d/%m/%Y %H:%M")
+            await self.channel_layer.group_send(self.group_name, content)
+
+    async def message(self, event):
+        await self.send_json(event)
