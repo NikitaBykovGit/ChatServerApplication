@@ -23,7 +23,7 @@ class RoomSerializer(TimeRepresentationMixin):
 
 class MessageSerializer(TimeRepresentationMixin):
     author = serializers.SlugRelatedField(slug_field='username', queryset=User.objects.all())
-    room = serializers.SlugRelatedField(slug_field='id', queryset=Room.objects.all())
+    room = serializers.SlugRelatedField(slug_field='name', queryset=Room.objects.all())
 
     class Meta:
         model = Message
@@ -32,7 +32,7 @@ class MessageSerializer(TimeRepresentationMixin):
 
 class RoomUserSerializer(serializers.HyperlinkedModelSerializer):
     user = serializers.SlugRelatedField(slug_field='username', queryset=User.objects.all())
-    room = serializers.SlugRelatedField(slug_field='id', queryset=Room.objects.all())
+    room = serializers.SlugRelatedField(slug_field='name', queryset=Room.objects.all())
 
     class Meta:
         model = RoomUser

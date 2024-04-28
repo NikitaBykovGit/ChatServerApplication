@@ -8,14 +8,15 @@ from .models import *
 class RoomViewset(viewsets.ModelViewSet):
     queryset = Room.objects.all()
     serializer_class = RoomSerializer
-    filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
-    filterset_fields = ["roomuser__user"]
 
     def get_queryset(self):
         queryset = Room.objects.all()
-        user_id = self.request.query_params.get('user_id', None)
-        if user_id is not None:
-            queryset = queryset.exclude(roomuser__user=user_id)
+        user = self.request.query_params.get('user', None)
+        notuser = self.request.query_params.get('notuser', None)
+        if user is not None:
+            queryset = queryset.filter(roomuser__user__username=user)
+        if notuser is not None:
+            queryset = queryset.exclude(roomuser__user__username=notuser)
         return queryset
 
 
@@ -23,14 +24,14 @@ class MessageViewset(viewsets.ModelViewSet):
     queryset = Message.objects.all()
     serializer_class = MessageSerializer
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
-    filterset_fields = ["room_id"]
+    filterset_fields = ["room__name"]
 
 
 class RoomUserViewset(viewsets.ModelViewSet):
     queryset = RoomUser.objects.all()
     serializer_class = RoomUserSerializer
     filter_backends = [django_filters.rest_framework.DjangoFilterBackend]
-    filterset_fields = ["room_id", "user_id"]
+    filterset_fields = ["room__name", "user__username"]
 
 
 class UserViewset(viewsets.ModelViewSet):
