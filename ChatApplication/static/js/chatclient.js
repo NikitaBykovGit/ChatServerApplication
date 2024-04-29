@@ -1,88 +1,86 @@
 const serverURL = "http://127.0.0.1:8000/api/v1/";
 const serverWSURL = "ws://127.0.0.1:8000/ws/";
+let Websocket;
 
-const output = document.getElementById("output");
-const chatsOutput = document.getElementById("chats_output");
-const messageOutput = document.getElementById("messages_output");
-const loginSection = document.getElementById("login");
-const loginBtn = document.getElementById("login_btn");
-const loginOutput = document.getElementById("login_output");
-const chatSection = document.getElementById("chats");
-const messageSection = document.getElementById("messages");
-const messageForm = document.getElementById("message_form");
-const messageInput = document.getElementById("message_input");
-const messageBtn = document.getElementById("message_btn");
-const accountList = document.getElementById("account_list");
-const logoutA = document.getElementById("logout");
-const navigation = document.getElementById("nav");
-const showAll = document.getElementById("show_all");
-const hideAll = document.getElementById("hide_all");
-const newChat = document.getElementById("new_chat");
-let socket;
-
-function display_massage(outputTag, message) {
-    let pre = document.createElement("aside");
+function displayRoom(outputTag, room, action) {
+    let pre = document.createElement("article");
     pre.innerHTML = `
-    <article>
-      <h3>${message.author || message["author"]}</h3>
+        <article>
+          <h3>${room.name}</h3>
+          <p class="rightCentr">${action}</p>
+          <p class ="textAuthor">Author: ${room.author}</p>
+          <p class ="textMembers">Members: ${room.members}</p>
+        </article>`;
+    outputTag.appendChild(pre);
+}
+
+function displayMessage(outputTag, message) {
+    let pre = document.createElement("article");
+    pre.innerHTML = `
+    <article class="rightMain">
+      <h3>${message.author}</h3>
       <p>${message.time}</p>
       <p>${message.text}</p>
     </article>`;
     outputTag.appendChild(pre);
 }
 
-function startApplication(server) {
-    if (localStorage.getItem("user") && localStorage.getItem("password")) {
+function displayMember(outputTag, member) {
+    let pre = document.createElement("article");
+    pre.innerHTML = `
+    <article class="rightMain">
+      <h3>${member.user}</h3>
+      <image class="writeButton" title="Write message" src="${pathToWriteMessage}"></image>
+    </article>`;
+    outputTag.appendChild(pre);
+}
+
+function startApplication(server, user, password) {
+    if (localStorage.getItem("authorize")) {
         displayRooms(
-            serverURL,
-            localStorage.getItem("user"),
-            localStorage.getItem("password"),
+            server,
+            user,
+            password,
             true,
         );
     } else {
-        authorizateUser(server)
+        authorizeUser(server)
     }
 }
 
-function authorizateUser(server) {
-    navigation.style.display = "none";
-    chatSection.style.display = "none";
-    messageSection.style.display = "none";
-    loginSection.style.display = "block";
-    if (localStorage.getItem("user") || localStorage.getItem("password")) {
-        loginOutput.innerHTML = "Incorrect login or password";
-    }
-    loginBtn.addEventListener("click", () => {
+function authorizeUser(server) {
+    document.getElementById("nav").style.display = "none";
+    document.getElementById("chats").style.display = "none";
+    document.getElementById("messages").style.display = "none";
+    document.getElementById("members").style.display = "none";
+    document.getElementById("login").style.display = "block";
+    document.getElementById("login_btn").addEventListener("click", () => {
         let loginInput = document.getElementById("login_input").value;
         let PassInput = document.getElementById("pass_input").value;
         localStorage.setItem("user", loginInput);
         localStorage.setItem("password", PassInput);
-        displayRooms(
-            server,
-            localStorage.getItem("user"),
-            localStorage.getItem("password"),
-            true,
-        );
         fetch(`${server}users/?format=json&username=${loginInput}`, {
             headers: new Headers({
                 Authorization: `Basic ${btoa(`${loginInput}:${PassInput}`)}`,
             }),
         })
             .then((response) => response.json())
-            .then(() => {
-                localStorage.setItem("user", loginInput);
-                localStorage.setItem("password", PassInput);
-                loginOutput.innerHTML = "";
-                displayRooms(
-                    server,
-                    localStorage.getItem("user"),
-                    localStorage.getItem("password"),
-                    true,
-                );
+            .then((data) => {
+                if (data['detail'] === 'Invalid username/password.') {
+                    document.getElementById("login_output").innerHTML = data['detail']
+                } else {
+                    localStorage.setItem("authorize", 'true');
+                    localStorage.setItem("user", loginInput);
+                    localStorage.setItem("password", PassInput);
+                    document.getElementById("login_output").innerHTML = "";
+                    displayRooms(
+                        server,
+                        localStorage.getItem("user"),
+                        localStorage.getItem("password"),
+                        true,
+                    );
+                }
             })
-            .catch(() => {
-                loginOutput.innerHTML = `<h3>Incorrect login or password<h3>`;
-            });
     });
 }
 
@@ -99,7 +97,7 @@ function createRoom(server, user, password, roomName) {
         }),
 
     }).then((response) => response.json())
-        .then((data) => {
+        .then(() => {
             displayRooms(
                 server,
                 user,
@@ -109,15 +107,18 @@ function createRoom(server, user, password, roomName) {
         });
 }
 
-function logout() {
+function logout(server) {
     localStorage.clear();
-    authorizateUser(serverURL);
+    document.getElementById("chats_output").innerHTML = "";
+    document.getElementById("messages_output").innerHTML = "";
+    document.getElementById("members_output").innerHTML = "";
+    authorizeUser(server);
 }
 
 function displayRooms(server, user, password, includeUser) {
-    loginSection.style.display = "none";
-    chatSection.style.display = "block";
-    messageSection.style.display = "block";
+    document.getElementById("login").style.display = "none";
+    document.getElementById("chats").style.display = "block";
+    document.getElementById("messages").style.display = "block";
     let url = `${server}rooms/?format=json`;
     let action = "join";
     if (includeUser) {
@@ -134,42 +135,33 @@ function displayRooms(server, user, password, includeUser) {
         .then((response) => response.json())
         .then((data) => {
             console.log(data);
-            chatsOutput.innerHTML = "";
-            navigation.style.display = "block";
-            accountList.innerHTML = `Hello, ${user}`;
+            document.getElementById("chats_output").innerHTML = "";
+            document.getElementById("nav").style.display = "block";
+            document.getElementById("account_list").innerHTML = `Hello, ${user}`;
             for (let i = 0; i < data.length; i++) {
-                let pre = document.createElement("article");
-                pre.innerHTML = `
-        <article>
-          <h3>${data[i].name}</h3>
-          <p class="rightCentr">${action}</p>
-          <p>${data[i].author}</p>
-          <p>Members: ${data[i].members}</p>
-        </article>`;
-                chatsOutput.appendChild(pre);
+                displayRoom(document.getElementById("chats_output"), data[i], action)
             }
         })
-        .catch((error) => (output.innerHTML = `<h3>${error}<h3>`));
+        .catch((error) => (document.getElementById("output").innerHTML = `<h3>${error}<h3>`));
 }
 
 function displayMessages(server, user, password, roomName) {
+    document.getElementById("members").style.display = "none";
+    document.getElementById("messages").style.display = "block";
     fetch(`${server}messages/?format=json&room__name=${roomName}`, {
         headers: new Headers({
             Authorization: `Basic ${btoa(`${user}:${password}`)}`,
         }),
     })
-        .then((response) => {
-            output.innerHTML = response.status;
-            return response.json();
-        })
+        .then((response) => response.json())
         .then((data) => {
-            messageOutput.innerHTML = "";
+            document.getElementById("messages_output").innerHTML = "";
             for (let i = 0; i < data.length; i++) {
-                display_massage(messages_output, data[i])
+                displayMessage(document.getElementById("messages_output"), data[i])
             }
         })
         .catch((error) => {
-            output.innerHTML = `<h3>${error}<h3>`;
+            document.getElementById("output").innerHTML = `<h3>${error}<h3>`;
         });
 }
 
@@ -207,75 +199,116 @@ function joinRoom(server, user, password, roomName) {
     });
 }
 
-startApplication(serverURL);
+function displayMembers(server, user, password, roomName) {
+    document.getElementById("login").style.display = "none";
+    document.getElementById("messages").style.display = "none";
+    document.getElementById("members").style.display = "block";
+    fetch(`${server}roomusers/?format=json&room__name=${roomName}`, {
+        headers: new Headers({
+            Authorization: `Basic ${btoa(`${user}:${password}`)}`,
+        }),
+    })
+        .then((response) => response.json())
+        .then((data) => {
+            document.getElementById("members_output").innerHTML = "";
+            for (let i = 0; i < data.length; i++) {
+                displayMember(document.getElementById("members_output"), data[i])
+            }
+        })
+        .catch((error) => {
+            document.getElementById("output").innerHTML = `<h3>${error}<h3>`;
+        });
+    let btns = document.querySelectorAll('.writeButton')
+    for (let i = 0; i < btns.length; i++) {
+        alert(i)
+        btns[i].addEventListener("click", (e) => {
+            alert(e.target.className)
+        })
+    }
 
-chatsOutput.addEventListener("click", (e) => {
+
+}
+
+startApplication(serverURL, localStorage.getItem("user"), localStorage.getItem("password"));
+
+document.getElementById("chats_output").addEventListener("click", (e) => {
     let roomName = e.target.parentElement.querySelector('H3').innerText
-    if (e.target.className === "rightCentr") {
-        leaveJoinRoom(
-            serverURL,
-            localStorage.getItem("user"),
-            localStorage.getItem("password"),
-            roomName,
-        );
-        e.target.parentElement.remove();
-    } else {
-        const parent = e.target.parentElement;
-        messageForm.style.display = "block";
-        sessionStorage.setItem("Room", roomName);
-        if (parent.tagName === "ARTICLE") {
-            socket = new WebSocket(serverWSURL + `room/${roomName}/`);
-            socket.onmessage = function (e) {
-                let data = JSON.parse(e.data);
-                display_massage(messageOutput, data)
-            };
-            displayMessages(
+    switch (e.target.className) {
+        case "rightCentr":
+            leaveJoinRoom(
                 serverURL,
                 localStorage.getItem("user"),
                 localStorage.getItem("password"),
                 roomName,
             );
-        }
+            e.target.parentElement.remove();
+            break;
+        case "textMembers":
+            displayMembers(serverURL,
+                localStorage.getItem("user"),
+                localStorage.getItem("password"),
+                roomName)
+            break;
+        default:
+            const parent = e.target.parentElement;
+            document.getElementById("message_form").style.display = "block";
+            sessionStorage.setItem("Room", roomName);
+            if (parent.tagName === "ARTICLE") {
+                Websocket = new WebSocket(serverWSURL + `room/${roomName}/`);
+                Websocket.onmessage = function (e) {
+                    let data = JSON.parse(e.data);
+                    if (data['type'] === 'message') displayMessage(document.getElementById("messages_output"), data)
+                    if (data['type'] === 'notmember') alert('Join the room to message')
+                };
+                displayMessages(
+                    serverURL,
+                    localStorage.getItem("user"),
+                    localStorage.getItem("password"),
+                    roomName,
+                );
+            }
+            break;
     }
+
 });
 
-logoutA.addEventListener("click", () => {
-    logout();
+document.getElementById("logout").addEventListener("click", () => {
+    logout(serverURL);
 });
 
-showAll.addEventListener("click", () => {
+document.getElementById("show_all").addEventListener("click", () => {
     displayRooms(
         serverURL,
         localStorage.getItem("user"),
         localStorage.getItem("password"),
     );
-    hideAll.style.display = "block";
-    showAll.style.display = "none";
+    document.getElementById("hide_all").style.display = "block";
+    document.getElementById("show_all").style.display = "none";
 });
 
-hideAll.addEventListener("click", () => {
+document.getElementById("hide_all").addEventListener("click", () => {
     displayRooms(
         serverURL,
         localStorage.getItem("user"),
         localStorage.getItem("password"),
         true,
     );
-    hideAll.style.display = "none";
-    showAll.style.display = "block";
+    document.getElementById("hide_all").style.display = "none";
+    document.getElementById("show_all").style.display = "block";
 });
 
-messageBtn.addEventListener("click", () => {
-    socket.send(
+document.getElementById("message_btn").addEventListener("click", () => {
+    Websocket.send(
         JSON.stringify({
             'author': localStorage.getItem("user"),
             'room': sessionStorage.getItem("Room"),
-            'text': messageInput.value,
+            'text': document.getElementById("message_input").value,
             'type': 'message'
         })
     );
 });
 
-newChat.addEventListener("click", () => {
+document.getElementById("new_chat").addEventListener("click", () => {
     let newChatName = prompt("Input new chat name:")
     createRoom(
         serverURL,

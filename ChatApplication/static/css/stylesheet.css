@@ -54,7 +54,11 @@ main {
   height: 85vh;
 }
 
-#messages {
+main section h2 {
+  margin: 5px;
+}
+
+.mainRight {
   position: absolute;
   background-color: white;
   right: 0;
@@ -86,17 +90,22 @@ main {
   width: 100%;
 }
 
-#messages_output article {
-  background-color: rgb(179, 73, 73);
-  display: block;
-  margin: 8px;
-}
-
 #chats {
   position: absolute;
   left: 0;
+  height: 100%;
   width: 20%;
-  height: 85vh;
+}
+
+#chats_output {
+  overflow-y: auto;
+  height: 100%;
+  width: 100%;
+}
+
+.rightMain {
+  background-color: rgb(179, 73, 73);
+  margin: 8px;
 }
 
 #chats aside {
@@ -107,8 +116,13 @@ main {
 
 .chatButton {
   float: right;
-  width: 22px;
-  height: 22px;
+  width: 30px;
+  height: 30px;
+}
+
+.writeButton {
+  width: 30px;
+  height: 30px;
 }
 
 .chatButton:hover {
@@ -126,8 +140,17 @@ main {
   width: 95%;
 }
 
-#chats_output article p {
+.textAuthor {
   color: gray;
+}
+
+.textMembers {
+  color: #5d5def;
+  width: 100px;
+}
+
+.textMembers:hover {
+  cursor: pointer;
 }
 
 #chats_output article:hover {
@@ -139,11 +162,15 @@ main {
   margin-top: 20%;
 }
 
-.rightCentr {
-  position: absolute;
-  right: 15px;
-}
-
 .rightCentr:hover {
   cursor: pointer;
+}
+
+.rightCentr {
+  float: right;
+  color: #5d5def;
+}
+
+#members {
+  display: none;
 }
