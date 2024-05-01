@@ -1,5 +1,5 @@
 import django_filters
-from rest_framework import viewsets, permissions, status
+from rest_framework import viewsets
 
 from .serializers import *
 from .models import *

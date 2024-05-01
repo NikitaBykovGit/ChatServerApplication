@@ -145,8 +145,8 @@ main section h2 {
 }
 
 .textMembers {
+  display: inline;
   color: #5d5def;
-  width: 100px;
 }
 
 .textMembers:hover {
@@ -169,6 +169,7 @@ main section h2 {
 .rightCentr {
   float: right;
   color: #5d5def;
+  margin: 0 5px;
 }
 
 #members {

@@ -95,7 +95,6 @@ function createRoom(server, user, password, roomName) {
             Authorization: `Basic ${btoa(`${user}:${password}`)}`,
             "Content-type": "application/json; charset=UTF-8",
         }),
-
     }).then((response) => response.json())
         .then(() => {
             displayRooms(
@@ -199,6 +198,43 @@ function joinRoom(server, user, password, roomName) {
     });
 }
 
+function createChatWithUser(server, user, password, targetUsername) {
+    roomName = `ChatWith${targetUsername}`
+    fetch(`${server}rooms/`, {
+        method: "POST",
+        body: JSON.stringify({
+            name: roomName,
+            author: user,
+        }),
+        headers: new Headers({
+            Authorization: `Basic ${btoa(`${user}:${password}`)}`,
+            "Content-type": "application/json; charset=UTF-8",
+        }),
+    }).then((response) => response.json())
+        .then((data) => {
+            alert(data.name)
+            fetch(`${server}roomusers/`, {
+                method: "POST",
+                body: JSON.stringify({
+                    room: data.name,
+                    user: targetUsername,
+                }),
+                headers: new Headers({
+                    Authorization: `Basic ${btoa(`${user}:${password}`)}`,
+                    "Content-type": "application/json; charset=UTF-8",
+                }),
+            });
+        })
+        .then(() => {
+            displayRooms(
+                server,
+                user,
+                password,
+                true,
+            )
+        })
+}
+
 function displayMembers(server, user, password, roomName) {
     document.getElementById("login").style.display = "none";
     document.getElementById("messages").style.display = "none";
@@ -215,16 +251,21 @@ function displayMembers(server, user, password, roomName) {
                 displayMember(document.getElementById("members_output"), data[i])
             }
         })
+        .then(() => {
+            let btns = document.querySelectorAll('.writeButton')
+            for (let i = 0; i < btns.length; i++) {
+                btns[i].addEventListener("click", (e) => {
+                    createChatWithUser(serverURL,
+                        localStorage.getItem("user"),
+                        localStorage.getItem("password"),
+                        e.target.previousElementSibling.innerHTML
+                    )
+                })
+            }
+        })
         .catch((error) => {
             document.getElementById("output").innerHTML = `<h3>${error}<h3>`;
         });
-    let btns = document.querySelectorAll('.writeButton')
-    for (let i = 0; i < btns.length; i++) {
-        alert(i)
-        btns[i].addEventListener("click", (e) => {
-            alert(e.target.className)
-        })
-    }
 
 
 }
@@ -311,12 +352,6 @@ document.getElementById("message_btn").addEventListener("click", () => {
 document.getElementById("new_chat").addEventListener("click", () => {
     let newChatName = prompt("Input new chat name:")
     createRoom(
-        serverURL,
-        localStorage.getItem("user"),
-        localStorage.getItem("password"),
-        newChatName
-    )
-    joinRoom(
         serverURL,
         localStorage.getItem("user"),
         localStorage.getItem("password"),

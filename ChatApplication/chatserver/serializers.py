@@ -13,6 +13,11 @@ class RoomSerializer(TimeRepresentationMixin):
     author = serializers.SlugRelatedField(slug_field='username', queryset=User.objects.all())
     members = serializers.SerializerMethodField('get_members_count')
 
+    def create(self, validated_data):
+        new_room = super().create(validated_data)
+        RoomUser.objects.create(room=new_room, user=validated_data['author'])
+        return new_room
+
     def get_members_count(self, obj):
         return RoomUser.objects.filter(room=obj).count()
 
