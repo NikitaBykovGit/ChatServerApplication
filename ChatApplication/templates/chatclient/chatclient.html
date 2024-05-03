@@ -18,21 +18,22 @@
 </header>
 <main>
     <section id="login">
-        <input type="text" id="login_input" placeholder="Login">
-        <input type="password" id="pass_input" placeholder="Password">
-        <button id="login_btn">Login</button>
+        <input type="text" class="inputLogin" id="login_input" placeholder="Login">
+        <input type="password" class="inputLogin" id="pass_input" placeholder="Password">
+        <button id="login_btn"></button>
+        <button id="registr_btn">Registration</button>
         <div id="login_output"></div>
     </section>
     <section id="chats">
         <h2>Chats</h2>
         <aside>
-            <image id="hide_all" class="chatButton" title="Your Chats" src="{% static 'img/YourChats.png' %}"></image>
+            <image id="hide_all" class="chatButton hide" title="Your Chats" src="{% static 'img/YourChats.png' %}"></image>
             <image id="show_all" class="chatButton" title="All Chats" src="{% static 'img/AllChats.png' %}"></image>
             <image id="new_chat" class="chatButton" title="New Chat" src="{% static 'img/NewChat.png' %}"></image>
         </aside>
         <div id="chats_output"></div>
     </section>
-    <section id="members" class="mainRight">
+    <section id="members" class="mainRight hide">
         <h2>Members</h2>
         <div id="members_output"></div>
     </section>

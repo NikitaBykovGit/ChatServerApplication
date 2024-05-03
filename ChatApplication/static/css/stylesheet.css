@@ -129,7 +129,7 @@ main section h2 {
   cursor: pointer;
 }
 
-#hide_all {
+.hide {
   display: none;
 }
 
@@ -158,8 +158,37 @@ main section h2 {
 }
 
 #login {
-  text-align: center;
-  margin-top: 20%;
+  background-color: #e16753;
+  position: absolute;
+  width: 320px;
+  height: 90px;
+  left: 50%;
+  margin-left: -160px;
+  top: 50%;
+  margin-top: -75px;
+  border-radius: 8px;
+}
+
+#login_btn {
+  display: block;
+  position: absolute;
+  width: 52px;
+  height: 52px;
+  border-radius: 50px;
+  top: 19px;
+  right: -2px;
+  border: 3px solid rgb(24, 112, 215);
+  background-image: url("../img/Login.png");
+  background-size: cover;
+}
+
+.inputLogin {
+  display: block;
+  width: 280px;
+  height: 45px;
+  border: 0;
+  padding: 0 0 0 20px;
+  font-weight: 700;
 }
 
 .rightCentr:hover {
@@ -170,8 +199,4 @@ main section h2 {
   float: right;
   color: #5d5def;
   margin: 0 5px;
-}
-
-#members {
-  display: none;
 }
