@@ -21,7 +21,8 @@
         <input type="text" class="inputLogin" id="login_input" placeholder="Login">
         <input type="password" class="inputLogin" id="pass_input" placeholder="Password">
         <button id="login_btn"></button>
-        <button id="registr_btn">Registration</button>
+        <button id="registr_btn" class="commonBtn">Registration</button>
+        <button id="reset_pass_btn" class="commonBtn">Reset password</button>
         <div id="login_output"></div>
     </section>
     <section id="chats">
@@ -51,6 +52,8 @@
 </footer>
 <script>
     const pathToWriteMessage = "{% static 'img/WriteMessage.png' %}";
+    const pathToLock = "{% static 'img/Lock.png' %}";
+    const pathToUnlock = "{% static 'img/Unlock.png' %}";
 </script>
 <script src="{% static 'js/chatclient.js' %}"></script>
 </body>

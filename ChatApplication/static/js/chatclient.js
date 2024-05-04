@@ -1,6 +1,7 @@
 const serverURL = "http://127.0.0.1:8000/api/v1/";
 const serverWSURL = "ws://127.0.0.1:8000/ws/";
-let Websocket;
+let websocket = undefined;
+let authHeader = undefined;
 
 function displayRoom(outputTag, room, action) {
     let pre = document.createElement("article");
@@ -37,15 +38,11 @@ function displayMember(outputTag, member) {
 
 function startApplication(server, user, password) {
     if (localStorage.getItem("authorize")) {
-        displayRooms(
-            server,
-            user,
-            password,
-            true,
-        );
-    } else {
-        authorizeUser(server)
-    }
+        authHeader = new Headers({
+            Authorization: `Basic ${btoa(`${user}:${password}`)}`, "Content-type": "application/json; charset=UTF-8",
+        })
+        displayRooms(server, user, authHeader, true,);
+    } else authorizeUser(server)
 }
 
 function authorizeUser(server) {
@@ -54,7 +51,7 @@ function authorizeUser(server) {
     document.getElementById("messages").style.display = "none";
     document.getElementById("members").style.display = "none";
     document.getElementById("login").style.display = "block";
-    document.getElementById("login_btn").addEventListener("click", () => {
+    document.getElementById("login_btn").addEventListener("click", function (e) {
         let loginInput = document.getElementById("login_input").value;
         let PassInput = document.getElementById("pass_input").value;
         localStorage.setItem("user", loginInput);
@@ -62,6 +59,7 @@ function authorizeUser(server) {
         fetch(`${server}users/?format=json&username=${loginInput}`, {
             headers: new Headers({
                 Authorization: `Basic ${btoa(`${loginInput}:${PassInput}`)}`,
+                "Content-type": "application/json; charset=UTF-8",
             }),
         })
             .then((response) => response.json())
@@ -69,52 +67,41 @@ function authorizeUser(server) {
                 if (data['detail'] === 'Invalid username/password.') {
                     document.getElementById("login_output").innerHTML = data['detail']
                 } else {
-                    localStorage.setItem("authorize", 'true');
-                    localStorage.setItem("user", loginInput);
-                    localStorage.setItem("password", PassInput);
-                    document.getElementById("login_output").innerHTML = "";
-                    displayRooms(
-                        server,
-                        localStorage.getItem("user"),
-                        localStorage.getItem("password"),
-                        true,
-                    );
+                    document.getElementById("login_btn").style.backgroundImage = `url(${pathToUnlock})`;
+                    setTimeout(() => {
+                        localStorage.setItem("authorize", 'true');
+                        localStorage.setItem("user", loginInput);
+                        localStorage.setItem("password", PassInput);
+                        document.getElementById("login_output").innerHTML = "";
+                        displayRooms(server, localStorage.getItem("user"), authHeader, true,);
+                        document.getElementById("login_btn").style.backgroundImage = `url(${pathToLock})`;
+                    }, 1000)
+                    e.target.removeEventListener(e.type, arguments.callee);
                 }
             })
     });
 }
 
-function createRoom(server, user, password, roomName) {
+function createRoom(server, user, header, roomName) {
     fetch(`${server}rooms/`, {
-        method: "POST",
-        body: JSON.stringify({
-            name: roomName,
-            author: user,
-        }),
-        headers: new Headers({
-            Authorization: `Basic ${btoa(`${user}:${password}`)}`,
-            "Content-type": "application/json; charset=UTF-8",
-        }),
+        method: "POST", body: JSON.stringify({
+            name: roomName, author: user,
+        }), headers: header,
     }).then((response) => response.json())
         .then(() => {
-            displayRooms(
-                server,
-                user,
-                password,
-                true,
-            )
+            displayRooms(server, user, header, true,)
         });
 }
 
-function logout(server) {
+function logout(server, header) {
     localStorage.clear();
     document.getElementById("chats_output").innerHTML = "";
     document.getElementById("messages_output").innerHTML = "";
     document.getElementById("members_output").innerHTML = "";
-    authorizeUser(server);
+    authorizeUser(server, header);
 }
 
-function displayRooms(server, user, password, includeUser) {
+function displayRooms(server, user, header, includeUser) {
     document.getElementById("login").style.display = "none";
     document.getElementById("chats").style.display = "block";
     document.getElementById("messages").style.display = "block";
@@ -126,142 +113,94 @@ function displayRooms(server, user, password, includeUser) {
     } else {
         url += `&notuser=${user}`;
     }
-    fetch(url, {
-        headers: new Headers({
-            Authorization: `Basic ${btoa(`${user}:${password}`)}`,
-        }),
-    })
+    fetch(url, {headers: header})
         .then((response) => response.json())
         .then((data) => {
             console.log(data);
             document.getElementById("chats_output").innerHTML = "";
             document.getElementById("nav").style.display = "block";
             document.getElementById("account_list").innerHTML = `Hello, ${user}`;
-            for (let i = 0; i < data.length; i++) {
-                displayRoom(document.getElementById("chats_output"), data[i], action)
-            }
+            data.forEach((room) => {
+                displayRoom(document.getElementById("chats_output"), room, action)
+            })
         })
         .catch((error) => (document.getElementById("output").innerHTML = `<h3>${error}<h3>`));
 }
 
-function displayMessages(server, user, password, roomName) {
+function displayMessages(server, header, roomName) {
     document.getElementById("members").style.display = "none";
     document.getElementById("messages").style.display = "block";
-    fetch(`${server}messages/?format=json&room__name=${roomName}`, {
-        headers: new Headers({
-            Authorization: `Basic ${btoa(`${user}:${password}`)}`,
-        }),
-    })
+    fetch(`${server}messages/?format=json&room__name=${roomName}`, {headers: header})
         .then((response) => response.json())
         .then((data) => {
             document.getElementById("messages_output").innerHTML = "";
-            for (let i = 0; i < data.length; i++) {
-                displayMessage(document.getElementById("messages_output"), data[i])
-            }
+            data.forEach((message) => {
+                displayMessage(document.getElementById("messages_output"), message)
+            })
         })
         .catch((error) => {
             document.getElementById("output").innerHTML = `<h3>${error}<h3>`;
         });
 }
 
-function leaveJoinRoom(server, user, password, roomName) {
-    fetch(`${server}roomusers/?format=json&room__name=${roomName}&user__username=${user}`, {
-        headers: new Headers({
-            Authorization: `Basic ${btoa(`${user}:${password}`)}`,
-        }),
-    })
+function leaveJoinRoom(server, user, header, roomName) {
+    fetch(`${server}roomusers/?format=json&room__name=${roomName}&user__username=${user}`, {headers: header})
         .then((response) => response.json())
-        .then((data) => leaveRoom(server, user, password, data[0].id))
-        .catch(() => joinRoom(server, user, password, roomName));
+        .then((data) => leaveRoom(server, header, data[0].id))
+        .catch(() => joinRoom(server, header, roomName));
 }
 
-function leaveRoom(server, user, password, tableID) {
-    fetch(`${server}roomusers/${tableID}`, {
-        method: "DELETE",
-        headers: new Headers({
-            Authorization: `Basic ${btoa(`${user}:${password}`)}`,
-        }),
-    });
+function leaveRoom(server, header, tableID) {
+    fetch(`${server}roomusers/${tableID}`, {method: "DELETE", headers: header});
 }
 
-function joinRoom(server, user, password, roomName) {
+function joinRoom(server, header, roomName) {
     fetch(`${server}roomusers/`, {
-        method: "POST",
-        body: JSON.stringify({
-            room: roomName,
-            user: user,
-        }),
-        headers: new Headers({
-            Authorization: `Basic ${btoa(`${user}:${password}`)}`,
-            "Content-type": "application/json; charset=UTF-8",
-        }),
+        method: "POST", body: JSON.stringify({
+            room: roomName, user: user,
+        }), headers: header,
     });
 }
 
-function createChatWithUser(server, user, password, targetUsername) {
+function createChatWithUser(server, user, header, targetUsername) {
     roomName = `ChatWith${targetUsername}`
     fetch(`${server}rooms/`, {
-        method: "POST",
-        body: JSON.stringify({
-            name: roomName,
-            author: user,
-        }),
-        headers: new Headers({
-            Authorization: `Basic ${btoa(`${user}:${password}`)}`,
-            "Content-type": "application/json; charset=UTF-8",
-        }),
+        method: "POST", body: JSON.stringify({
+            name: roomName, author: user,
+        }), headers: header
     }).then((response) => response.json())
         .then((data) => {
             alert(data.name)
             fetch(`${server}roomusers/`, {
-                method: "POST",
-                body: JSON.stringify({
-                    room: data.name,
-                    user: targetUsername,
-                }),
-                headers: new Headers({
-                    Authorization: `Basic ${btoa(`${user}:${password}`)}`,
-                    "Content-type": "application/json; charset=UTF-8",
-                }),
+                method: "POST", body: JSON.stringify({
+                    room: data.name, user: targetUsername,
+                }), headers: header
             });
         })
         .then(() => {
-            displayRooms(
-                server,
-                user,
-                password,
-                true,
-            )
+            displayRooms(server, user, header, true,)
         })
 }
 
-function displayMembers(server, user, password, roomName) {
+function displayMembers(server, header, roomName) {
     document.getElementById("login").style.display = "none";
     document.getElementById("messages").style.display = "none";
     document.getElementById("members").style.display = "block";
-    fetch(`${server}roomusers/?format=json&room__name=${roomName}`, {
-        headers: new Headers({
-            Authorization: `Basic ${btoa(`${user}:${password}`)}`,
-        }),
-    })
+    fetch(`${server}roomusers/?format=json&room__name=${roomName}`, {headers: header})
         .then((response) => response.json())
         .then((data) => {
             document.getElementById("members_output").innerHTML = "";
-            for (let i = 0; i < data.length; i++) {
-                displayMember(document.getElementById("members_output"), data[i])
-            }
+            data.forEach((d) => {
+                displayMember(document.getElementById("members_output"), d)
+            })
         })
         .then(() => {
-            let btns = document.querySelectorAll('.writeButton')
-            for (let i = 0; i < btns.length; i++) {
-                btns[i].addEventListener("click", (e) => {
-                    createChatWithUser(serverURL,
-                        localStorage.getItem("user"),
-                        localStorage.getItem("password"),
-                        e.target.previousElementSibling.innerHTML
-                    )
+            let buttons = document.querySelectorAll('.writeButton')
+            buttons.forEach((button) => {
+                button.addEventListener("click", (e) => {
+                    createChatWithUser(serverURL, localStorage.getItem("user"), header, e.target.previousElementSibling.innerHTML)
                 })
-            }
+            })
         })
         .catch((error) => {
             document.getElementById("output").innerHTML = `<h3>${error}<h3>`;
@@ -272,45 +211,33 @@ function displayMembers(server, user, password, roomName) {
 
 startApplication(serverURL, localStorage.getItem("user"), localStorage.getItem("password"));
 
-document.getElementById("chats_output").addEventListener("click", (e) => {
+document.getElementById("chats_output").addEventListener("click", function (e) {
     let roomName = e.target.parentElement.querySelector('H3').innerText
     switch (e.target.className) {
         case "rightCentr":
-            leaveJoinRoom(
-                serverURL,
-                localStorage.getItem("user"),
-                localStorage.getItem("password"),
-                roomName,
-            );
+            leaveJoinRoom(serverURL, localStorage.getItem("user"), authHeader, roomName,);
             e.target.parentElement.remove();
             break;
         case "textMembers":
-            displayMembers(serverURL,
-                localStorage.getItem("user"),
-                localStorage.getItem("password"),
-                roomName)
+            displayMembers(serverURL, authHeader, roomName)
             break;
         default:
             const parent = e.target.parentElement;
             document.getElementById("message_form").style.display = "block";
             sessionStorage.setItem("Room", roomName);
             if (parent.tagName === "ARTICLE") {
-                Websocket = new WebSocket(serverWSURL + `room/${roomName}/`);
-                Websocket.onmessage = function (e) {
+                if (websocket) websocket.close()
+                websocket = new WebSocket(serverWSURL + `room/${roomName}/`);
+                websocket.onmessage = function (e) {
                     let data = JSON.parse(e.data);
                     if (data['type'] === 'message') displayMessage(document.getElementById("messages_output"), data)
                     if (data['type'] === 'notmember') alert('Join the room to message')
                 };
-                displayMessages(
-                    serverURL,
-                    localStorage.getItem("user"),
-                    localStorage.getItem("password"),
-                    roomName,
-                );
+                displayMessages(serverURL, authHeader, roomName,);
             }
             break;
     }
-
+    e.target.removeEventListener(e.type, arguments.callee);
 });
 
 document.getElementById("logout").addEventListener("click", () => {
@@ -318,43 +245,27 @@ document.getElementById("logout").addEventListener("click", () => {
 });
 
 document.getElementById("show_all").addEventListener("click", () => {
-    displayRooms(
-        serverURL,
-        localStorage.getItem("user"),
-        localStorage.getItem("password"),
-    );
+    displayRooms(serverURL, localStorage.getItem("user"), authHeader,);
     document.getElementById("hide_all").style.display = "block";
     document.getElementById("show_all").style.display = "none";
 });
 
 document.getElementById("hide_all").addEventListener("click", () => {
-    displayRooms(
-        serverURL,
-        localStorage.getItem("user"),
-        localStorage.getItem("password"),
-        true,
-    );
+    displayRooms(serverURL, localStorage.getItem("user"), authHeader, true,);
     document.getElementById("hide_all").style.display = "none";
     document.getElementById("show_all").style.display = "block";
 });
 
 document.getElementById("message_btn").addEventListener("click", () => {
-    Websocket.send(
-        JSON.stringify({
-            'author': localStorage.getItem("user"),
-            'room': sessionStorage.getItem("Room"),
-            'text': document.getElementById("message_input").value,
-            'type': 'message'
-        })
-    );
+    websocket.send(JSON.stringify({
+        'author': localStorage.getItem("user"),
+        'room': sessionStorage.getItem("Room"),
+        'text': document.getElementById("message_input").value,
+        'type': 'message'
+    }));
 });
 
 document.getElementById("new_chat").addEventListener("click", () => {
     let newChatName = prompt("Input new chat name:")
-    createRoom(
-        serverURL,
-        localStorage.getItem("user"),
-        localStorage.getItem("password"),
-        newChatName
-    )
+    createRoom(serverURL, localStorage.getItem("user"), authHeader, newChatName)
 })

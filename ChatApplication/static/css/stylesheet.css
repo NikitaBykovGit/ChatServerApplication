@@ -178,7 +178,7 @@ main section h2 {
   top: 19px;
   right: -2px;
   border: 3px solid rgb(24, 112, 215);
-  background-image: url("../img/Login.png");
+  background-image: url("../img/Lock.png");
   background-size: cover;
 }
 
@@ -199,4 +199,23 @@ main section h2 {
   float: right;
   color: #5d5def;
   margin: 0 5px;
+}
+
+.commonBtn {
+  padding: 0;
+  background-color: transparent;
+  border: none;
+  outline: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: none;
+  cursor: pointer;
+  margin: 5px 10px;
+  padding: 10px 15px;
+  border-radius: 1px;
+  font-size: 12px;
+  line-height: 15px;
+  text-transform: uppercase;
+  color: white;
+  background: #315efb;
+  transition: 0.3s;
 }
