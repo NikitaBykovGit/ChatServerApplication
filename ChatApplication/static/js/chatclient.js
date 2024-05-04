@@ -1,7 +1,7 @@
 const serverURL = "http://127.0.0.1:8000/api/v1/";
 const serverWSURL = "ws://127.0.0.1:8000/ws/";
 let websocket = undefined;
-let authHeader = undefined;
+let authHeaders = undefined;
 
 function displayRoom(outputTag, room, action) {
     let pre = document.createElement("article");
@@ -38,10 +38,11 @@ function displayMember(outputTag, member) {
 
 function startApplication(server, user, password) {
     if (localStorage.getItem("authorize")) {
-        authHeader = new Headers({
-            Authorization: `Basic ${btoa(`${user}:${password}`)}`, "Content-type": "application/json; charset=UTF-8",
+        authHeaders = new Headers({
+            Authorization: `Basic ${btoa(`${user}:${password}`)}`,
+            "Content-type": "application/json; charset=UTF-8",
         })
-        displayRooms(server, user, authHeader, true,);
+        displayRooms(server, user, authHeaders, true,);
     } else authorizeUser(server)
 }
 
@@ -56,12 +57,11 @@ function authorizeUser(server) {
         let PassInput = document.getElementById("pass_input").value;
         localStorage.setItem("user", loginInput);
         localStorage.setItem("password", PassInput);
-        fetch(`${server}users/?format=json&username=${loginInput}`, {
-            headers: new Headers({
-                Authorization: `Basic ${btoa(`${loginInput}:${PassInput}`)}`,
-                "Content-type": "application/json; charset=UTF-8",
-            }),
+        authHeaders = new Headers({
+            Authorization: `Basic ${btoa(`${loginInput}:${PassInput}`)}`,
+            "Content-type": "application/json; charset=UTF-8",
         })
+        fetch(`${server}users/?format=json&username=${loginInput}`, {headers: authHeaders})
             .then((response) => response.json())
             .then((data) => {
                 if (data['detail'] === 'Invalid username/password.') {
@@ -73,7 +73,7 @@ function authorizeUser(server) {
                         localStorage.setItem("user", loginInput);
                         localStorage.setItem("password", PassInput);
                         document.getElementById("login_output").innerHTML = "";
-                        displayRooms(server, localStorage.getItem("user"), authHeader, true,);
+                        displayRooms(server, localStorage.getItem("user"), authHeaders, true,);
                         document.getElementById("login_btn").style.backgroundImage = `url(${pathToLock})`;
                     }, 1000)
                     e.target.removeEventListener(e.type, arguments.callee);
@@ -84,13 +84,10 @@ function authorizeUser(server) {
 
 function createRoom(server, user, header, roomName) {
     fetch(`${server}rooms/`, {
-        method: "POST", body: JSON.stringify({
-            name: roomName, author: user,
-        }), headers: header,
+        method: "POST", body: JSON.stringify({name: roomName, author: user,}),
+        headers: header,
     }).then((response) => response.json())
-        .then(() => {
-            displayRooms(server, user, header, true,)
-        });
+        .then(() => displayRooms(server, user, header, true))
 }
 
 function logout(server, header) {
@@ -110,9 +107,7 @@ function displayRooms(server, user, header, includeUser) {
     if (includeUser) {
         url += `&user=${user}`;
         action = "leave";
-    } else {
-        url += `&notuser=${user}`;
-    }
+    } else url += `&notuser=${user}`
     fetch(url, {headers: header})
         .then((response) => response.json())
         .then((data) => {
@@ -120,9 +115,7 @@ function displayRooms(server, user, header, includeUser) {
             document.getElementById("chats_output").innerHTML = "";
             document.getElementById("nav").style.display = "block";
             document.getElementById("account_list").innerHTML = `Hello, ${user}`;
-            data.forEach((room) => {
-                displayRoom(document.getElementById("chats_output"), room, action)
-            })
+            data.forEach((room) => displayRoom(document.getElementById("chats_output"), room, action));
         })
         .catch((error) => (document.getElementById("output").innerHTML = `<h3>${error}<h3>`));
 }
@@ -134,13 +127,9 @@ function displayMessages(server, header, roomName) {
         .then((response) => response.json())
         .then((data) => {
             document.getElementById("messages_output").innerHTML = "";
-            data.forEach((message) => {
-                displayMessage(document.getElementById("messages_output"), message)
-            })
+            data.forEach((message) => displayMessage(document.getElementById("messages_output"), message))
         })
-        .catch((error) => {
-            document.getElementById("output").innerHTML = `<h3>${error}<h3>`;
-        });
+        .catch((error) => document.getElementById("output").innerHTML = `<h3>${error}<h3>`)
 }
 
 function leaveJoinRoom(server, user, header, roomName) {
@@ -215,11 +204,11 @@ document.getElementById("chats_output").addEventListener("click", function (e) {
     let roomName = e.target.parentElement.querySelector('H3').innerText
     switch (e.target.className) {
         case "rightCentr":
-            leaveJoinRoom(serverURL, localStorage.getItem("user"), authHeader, roomName,);
+            leaveJoinRoom(serverURL, localStorage.getItem("user"), authHeaders, roomName,);
             e.target.parentElement.remove();
             break;
         case "textMembers":
-            displayMembers(serverURL, authHeader, roomName)
+            displayMembers(serverURL, authHeaders, roomName)
             break;
         default:
             const parent = e.target.parentElement;
@@ -233,7 +222,7 @@ document.getElementById("chats_output").addEventListener("click", function (e) {
                     if (data['type'] === 'message') displayMessage(document.getElementById("messages_output"), data)
                     if (data['type'] === 'notmember') alert('Join the room to message')
                 };
-                displayMessages(serverURL, authHeader, roomName,);
+                displayMessages(serverURL, authHeaders, roomName,);
             }
             break;
     }
@@ -245,13 +234,13 @@ document.getElementById("logout").addEventListener("click", () => {
 });
 
 document.getElementById("show_all").addEventListener("click", () => {
-    displayRooms(serverURL, localStorage.getItem("user"), authHeader,);
+    displayRooms(serverURL, localStorage.getItem("user"), authHeaders,);
     document.getElementById("hide_all").style.display = "block";
     document.getElementById("show_all").style.display = "none";
 });
 
 document.getElementById("hide_all").addEventListener("click", () => {
-    displayRooms(serverURL, localStorage.getItem("user"), authHeader, true,);
+    displayRooms(serverURL, localStorage.getItem("user"), authHeaders, true,);
     document.getElementById("hide_all").style.display = "none";
     document.getElementById("show_all").style.display = "block";
 });
@@ -267,5 +256,5 @@ document.getElementById("message_btn").addEventListener("click", () => {
 
 document.getElementById("new_chat").addEventListener("click", () => {
     let newChatName = prompt("Input new chat name:")
-    createRoom(serverURL, localStorage.getItem("user"), authHeader, newChatName)
+    createRoom(serverURL, localStorage.getItem("user"), authHeaders, newChatName)
 })
