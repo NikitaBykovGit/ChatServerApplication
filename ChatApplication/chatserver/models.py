@@ -1,7 +1,7 @@
-from json import dumps
-
 from django.contrib.auth.models import User
 from django.db import models
+
+from .utils import Uploader
 
 
 class Room(models.Model):
@@ -34,3 +34,12 @@ class RoomUser(models.Model):
         constraints = [
             models.UniqueConstraint(fields=['room', 'user'], name='unique user for each room'),
         ]
+
+
+class Profile(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    avatar = models.ImageField(null=True, blank=True, upload_to=Uploader.get_filename("img/avatars/"))
+
+    def __str__(self):
+        return f'AVATAR USER: {self.user.username}'
+

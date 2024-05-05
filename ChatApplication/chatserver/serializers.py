@@ -45,6 +45,8 @@ class RoomUserSerializer(serializers.HyperlinkedModelSerializer):
 
 
 class UserSerializer(serializers.HyperlinkedModelSerializer):
+    avatar_url = serializers.ImageField(max_length=None, source='profile.avatar', use_url=True)
+
     class Meta:
         model = User
-        fields = ['id', 'username', ]
+        fields = ['id', 'username', 'avatar_url', ]

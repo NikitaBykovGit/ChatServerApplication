@@ -7,10 +7,10 @@ function displayRoom(outputTag, room, action) {
     let pre = document.createElement("article");
     pre.innerHTML = `
         <article>
-          <h3>${room.name}</h3>
-          <button class="leave-join horizontal interface-btn">${action}</button>
-          <p>Author: ${room.author}</p>
-          <button class ="line interface-btn">Members: ${room.members}</button>
+            <h3>${room.name}</h3>
+            <button class="leave-join horizontal interface-btn">${action}</button>
+            <p>Author: ${room.author}</p>
+            <button class ="line interface-btn">Members: ${room.members}</button>
         </article>`;
     outputTag.appendChild(pre);
 }
@@ -19,9 +19,12 @@ function displayMessage(outputTag, message) {
     let pre = document.createElement("article");
     pre.innerHTML = `
     <article class="line-main">
-      <h3>${message.author}</h3>
-      <p>${message.time}</p>
-      <p>${message.text}</p>
+        <image class="avatar" src="${pathToDefaultProfile}"></image>
+        <div class="msg-content">
+            <h3>${message.author}</h3>
+            <p>${message.time}</p>  
+            <p>${message.text}</p>
+        </div>
     </article>`;
     outputTag.appendChild(pre);
 }
@@ -30,8 +33,8 @@ function displayMember(outputTag, member) {
     let pre = document.createElement("article");
     pre.innerHTML = `
     <article class="line-main">
-      <h3>${member.user}</h3>
-      <button id="write_msg" class="control-btn" title="Write message"></button>   
+        <h3>${member.user}</h3>
+        <button id="write_msg" class="control-btn" title="Write message"></button>   
     </article>`;
     outputTag.appendChild(pre);
 }
