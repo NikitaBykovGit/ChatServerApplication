@@ -47,7 +47,7 @@ main section h2 {
   margin: 5px;
 }
 
-.mainRight {
+.main-right {
   position: absolute;
   background-color: white;
   right: 0;
@@ -57,7 +57,6 @@ main section h2 {
 
 #message_form {
   position: absolute;
-  display: none;
   bottom: 0;
   height: 5vh;
   width: 100%;
@@ -65,12 +64,33 @@ main section h2 {
 
 #message_form input {
   height: 100%;
-  width: 95%;
+  width: 94%;
+  float: left;
 }
 
-#message_form button {
+.interface-btn {
+  border: none;
+  font-size: 12px;
+  text-transform: uppercase;
+  color: white;
+  background: #315efb;
+}
+
+.leave-join {
+  position: absolute;
+  right: 0.5em;
+  top: 15%;
+}
+
+.horizontal {
+  margin: 5px 10px;
+  padding: 10px 15px;
+}
+
+#msg_btn {
+  float: right;
   height: 100%;
-  width: 4%;
+  width: 6%;
 }
 
 #messages_output {
@@ -92,34 +112,60 @@ main section h2 {
   width: 100%;
 }
 
-.rightMain {
+.line-main {
   background-color: rgb(179, 73, 73);
-  margin: 8px;
+  margin: 0.5em;
+  padding: 0.5em;
 }
 
-#chats aside {
+.chats-btns {
   position: absolute;
   top: 2px;
   right: 0;
 }
 
-.chatButton {
+.control-btn {
   float: right;
   width: 30px;
   height: 30px;
+  border: none;
+  background-size: cover;
 }
 
-.writeButton {
-  width: 30px;
-  height: 30px;
+.line {
+  display: inline;
 }
 
-.chatButton:hover {
-  cursor: pointer;
+button {
+  cursor: pointer
+}
+
+#hide_all {
+  background-image: url("../img/YourChats.png");
+}
+
+#show_all {
+  background-image: url("../img/AllChats.png");
+}
+
+#new_chat {
+  background-image: url("../img/NewChat.png");
+}
+
+#write_msg {
+  background-image: url("../img/WriteMessage.png");
+  position: absolute;
+  right: 1em;
+  top: 50%;
+  margin-top: -15px;
 }
 
 .hide {
   display: none;
+}
+
+article {
+  position: relative;
 }
 
 #chats_output article {
@@ -127,19 +173,6 @@ main section h2 {
   display: block;
   margin: 5%;
   width: 95%;
-}
-
-.textAuthor {
-  color: gray;
-}
-
-.textMembers {
-  display: inline;
-  color: #5d5def;
-}
-
-.textMembers:hover, #login_btn:hover {
-  cursor: pointer;
 }
 
 #chats_output article:hover {
@@ -171,32 +204,11 @@ main section h2 {
   background-size: cover;
 }
 
-.inputLogin {
+.input-login {
   display: block;
   width: 280px;
   height: 45px;
   border: 0;
   padding: 0 0 0 20px;
   font-weight: 700;
-}
-
-.rightCentr:hover {
-  cursor: pointer;
-}
-
-.rightCentr {
-  float: right;
-  color: #5d5def;
-  margin: 0 5px;
-}
-
-.commonBtn {
-  border: none;
-  cursor: pointer;
-  margin: 5px 10px;
-  padding: 10px 15px;
-  font-size: 12px;
-  text-transform: uppercase;
-  color: white;
-  background: #315efb;
 }

@@ -8,9 +8,9 @@ function displayRoom(outputTag, room, action) {
     pre.innerHTML = `
         <article>
           <h3>${room.name}</h3>
-          <p class="rightCentr">${action}</p>
-          <p class ="textAuthor">Author: ${room.author}</p>
-          <p class ="textMembers">Members: ${room.members}</p>
+          <button class="leave-join horizontal interface-btn">${action}</button>
+          <p>Author: ${room.author}</p>
+          <button class ="line interface-btn">Members: ${room.members}</button>
         </article>`;
     outputTag.appendChild(pre);
 }
@@ -18,7 +18,7 @@ function displayRoom(outputTag, room, action) {
 function displayMessage(outputTag, message) {
     let pre = document.createElement("article");
     pre.innerHTML = `
-    <article class="rightMain">
+    <article class="line-main">
       <h3>${message.author}</h3>
       <p>${message.time}</p>
       <p>${message.text}</p>
@@ -29,9 +29,9 @@ function displayMessage(outputTag, message) {
 function displayMember(outputTag, member) {
     let pre = document.createElement("article");
     pre.innerHTML = `
-    <article class="rightMain">
+    <article class="line-main">
       <h3>${member.user}</h3>
-      <image class="writeButton" title="Write message" src="${pathToWriteMessage}"></image>
+      <button id="write_msg" class="control-btn" title="Write message"></button>   
     </article>`;
     outputTag.appendChild(pre);
 }
@@ -159,7 +159,6 @@ function createChatWithUser(server, user, header, targetUsername) {
         }), headers: header
     }).then((response) => response.json())
         .then((data) => {
-            alert(data.name)
             fetch(`${server}roomusers/`, {
                 method: "POST", body: JSON.stringify({
                     room: data.name, user: targetUsername,
@@ -184,10 +183,11 @@ function displayMembers(server, header, roomName) {
             })
         })
         .then(() => {
-            let buttons = document.querySelectorAll('.writeButton')
+            let buttons = document.querySelectorAll('#write_msg')
             buttons.forEach((button) => {
                 button.addEventListener("click", (e) => {
-                    createChatWithUser(serverURL, localStorage.getItem("user"), header, e.target.previousElementSibling.innerHTML)
+                    createChatWithUser(serverURL, localStorage.getItem("user"),
+                        header, e.target.previousElementSibling.innerHTML)
                 })
             })
         })
@@ -203,11 +203,11 @@ startApplication(serverURL, localStorage.getItem("user"), localStorage.getItem("
 document.getElementById("chats_output").addEventListener("click", function (e) {
     let roomName = e.target.parentElement.querySelector('H3').innerText
     switch (e.target.className) {
-        case "rightCentr":
+        case "leave-join horizontal interface-btn":
             leaveJoinRoom(serverURL, localStorage.getItem("user"), authHeaders, roomName,);
             e.target.parentElement.remove();
             break;
-        case "textMembers":
+        case "line interface-btn":
             displayMembers(serverURL, authHeaders, roomName)
             break;
         default:
@@ -245,7 +245,7 @@ document.getElementById("hide_all").addEventListener("click", () => {
     document.getElementById("show_all").style.display = "block";
 });
 
-document.getElementById("message_btn").addEventListener("click", () => {
+document.getElementById("msg_btn").addEventListener("click", () => {
     websocket.send(JSON.stringify({
         'author': localStorage.getItem("user"),
         'room': sessionStorage.getItem("Room"),

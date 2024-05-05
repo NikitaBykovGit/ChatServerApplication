@@ -11,39 +11,39 @@
     <h1>Chat Client Application</h1>
     <nav id="nav">
         <ul>
-            <li><button id="logout" class="commonBtn">Logout</button></li>
-            <li><button id="account_list" class="commonBtn"></button></li>
+            <li><button id="logout" class="interface-btn horizontal">Logout</button></li>
+            <li><button id="account_list" class="interface-btn horizontal"></button></li>
         </ul>
     </nav>
 </header>
 <main>
     <section id="login">
-        <input type="text" class="inputLogin" id="login_input" placeholder="Login">
-        <input type="password" class="inputLogin" id="pass_input" placeholder="Password">
+        <input type="text" class="input-login" id="login_input" placeholder="Login">
+        <input type="password" class="input-login" id="pass_input" placeholder="Password">
         <button id="login_btn"></button>
-        <button id="registr_btn" class="commonBtn">Registration</button>
-        <button id="reset_pass_btn" class="commonBtn">Reset password</button>
+        <button id="registr_btn" class="interface-btn horizontal">Registration</button>
+        <button id="reset_pass_btn" class="interface-btn horizontal">Reset password</button>
         <div id="login_output"></div>
     </section>
     <section id="chats">
         <h2>Chats</h2>
-        <aside>
-            <image id="hide_all" class="chatButton hide" title="Your Chats" src="{% static 'img/YourChats.png' %}"></image>
-            <image id="show_all" class="chatButton" title="All Chats" src="{% static 'img/AllChats.png' %}"></image>
-            <image id="new_chat" class="chatButton" title="New Chat" src="{% static 'img/NewChat.png' %}"></image>
+        <aside class ="chats-btns">
+            <button id="hide_all" class="control-btn hide" title="Your Chats"></button>
+            <button id="show_all" class="control-btn" title="All Chats"></button>
+            <button id="new_chat" class="control-btn" title="New Chat"></button>
         </aside>
         <div id="chats_output"></div>
     </section>
-    <section id="members" class="mainRight hide">
+    <section id="members" class="main-right hide">
         <h2>Members</h2>
         <div id="members_output"></div>
     </section>
-    <section id="messages" class="mainRight">
+    <section id="messages" class="main-right">
         <h2>Messages</h2>
         <div id="messages_output"></div>
-        <aside id="message_form" method="post">
+        <aside id="message_form" class="hide" method="post">
             <input type="text" id="message_input" placeholder="Your message">
-            <button id="message_btn">Send</button>
+            <button id="msg_btn" class="interface-btn">Send</button>
         </aside>
     </section>
 </main>
@@ -51,7 +51,6 @@
     <div id="output"></div>
 </footer>
 <script>
-    const pathToWriteMessage = "{% static 'img/WriteMessage.png' %}";
     const pathToLock = "{% static 'img/Lock.png' %}";
     const pathToUnlock = "{% static 'img/Unlock.png' %}";
 </script>
